@@ -1,0 +1,488 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Color Gen. By Raj Kamboj 9465428299</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lobster&family=Playfair+Display:ital,wght@1,700&family=Righteous&family=Pacifico&family=Bangers&family=Monoton&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.5.1/mammoth.browser.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; padding: 10px; color: #e0e0e0; margin: 0; }
+        .container { background: #2d2d2d; padding: 10px; border-radius: 10px; max-width: 1000px; margin: 0 auto; border: 1px solid #444; }
+        h1 { 
+            text-align: center; 
+            color: #fff; 
+            font-size: 16px; 
+            margin: 0 0 10px 0;
+            background: linear-gradient(to right, #FF0000, #FF8C00, #FFD700, #00FFFF, #0000FF, #8A2BE2, #FF00FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        textarea { 
+            width: 100%; height: 100px; padding: 8px; border: 1px solid #555; border-radius: 6px; 
+            background: #1a1a1a; color: #e0e0e0; box-sizing: border-box; margin-bottom: 8px; 
+            font-size: 13px; white-space: pre; overflow-x: auto;
+        }
+        
+        .toolbar-container { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: #252525; padding: 6px; border-radius: 8px; border: 1px solid #444; }
+        
+        .style-tools { display: flex; flex-direction: column; gap: 3px; border-right: 1px solid #444; padding-right: 8px; }
+        .tool-btn { 
+            width: 22px; height: 22px; background: #333; color: white; border: 1px solid #555; 
+            border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 11px; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .tool-btn.active { background: #8B0000; border-color: #ff4444; }
+
+        .color-circles-wrapper { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
+        .color-circles-line { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+        .color-circle { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #444; cursor: pointer; }
+
+        .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-bottom: 10px; }
+        .buttons button { 
+            color: white; border: none; padding: 9px 14px; border-radius: 6px; cursor: pointer; 
+            font-size: 12px; font-weight: bold; min-width: 70px; 
+        }
+        .btn-open { background: linear-gradient(135deg, #8B0000, #A52A2A); }
+        .btn-conv { background: linear-gradient(135deg, #CC5500, #D2691E); }
+        .btn-dl { background: linear-gradient(135deg, #006400, #228B22); }
+        .btn-dl-alt { background: linear-gradient(135deg, #00008B, #4169E1); }
+        .btn-clear { background: linear-gradient(135deg, #8B008B, #9932CC); }
+
+        .controls-wrapper { background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; margin-bottom: 8px; }
+        .control-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; padding-bottom: 10px; border-bottom: 1px solid #333; }
+        .control-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .control-label-area { flex-shrink: 0; width: 85px; font-size: 10px; font-weight: bold; display: flex; justify-content: space-between; color: #bbb; }
+        .slider-container { flex-grow: 1; display: flex; align-items: center; }
+        input[type="range"] { cursor: pointer; width: 100%; height: 4px; accent-color: #ff4444; }
+
+        .font-selector {
+            background: #333; color: white; border: 1px solid #555; border-radius: 4px;
+            font-size: 11px; padding: 3px; cursor: pointer; width: 100%;
+        }
+
+        .mini-picker { width: 30px; height: 18px; cursor: pointer; background: #333; border: 1px solid #555; border-radius: 3px; margin-left: 5px; }
+
+        #output { 
+            margin: 20px auto; 
+            box-sizing: border-box; 
+            font-size: 12px; 
+            line-height: 1.4; 
+            padding: 0;
+            font-weight: bold; 
+            text-align: left;
+            white-space: pre-wrap;
+            overflow-wrap: normal;
+            word-break: normal;
+            border: none;
+            border-radius: 0;
+            display: block;
+        }
+
+        #outputWrapper {
+            overflow-x: auto;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
+        }
+
+        .size-control {
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-wrap: nowrap; 
+            gap: 10px; 
+            margin-top: 8px; 
+            font-size: 11px;
+        }
+        .size-control > div { display: flex; align-items: center; gap: 5px; }
+        .size-control label { font-weight: bold; white-space: nowrap; font-size: 10px; }
+        .size-control input { 
+            width: 60px; padding: 4px; background: #333; color: white; 
+            border: 1px solid #555; border-radius: 4px; font-size: 11px;
+        }
+
+        .middle-section { display: block; margin-bottom: 8px; }
+
+        @media (min-width: 768px) {
+            .middle-section { display: flex; gap: 20px; }
+            .left-panel { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+            .right-panel { flex: 1; }
+        }
+
+        @media (max-width: 767px) {
+            #output { max-width: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Text Color Gen. By Raj Kamboj 9465428299</h1>
+    <textarea id="inputText" placeholder="Enter text here..."></textarea>
+
+    <div class="middle-section">
+        <div class="left-panel">
+            <div class="toolbar-container">
+                <div class="style-tools">
+                    <div style="display:flex; gap:3px;">
+                        <button class="tool-btn active" id="boldBtn" onclick="toggleStyle('bold')">B</button>
+                        <button class="tool-btn" id="italicBtn" onclick="toggleStyle('italic')">I</button>
+                    </div>
+                    <div style="display:flex; gap:3px;">
+                        <button class="tool-btn active" id="leftBtn" onclick="setAlignment('left')">L</button>
+                        <button class="tool-btn" id="centerBtn" onclick="setAlignment('center')">C</button>
+                        <button class="tool-btn" id="rightBtn" onclick="setAlignment('right')">R</button>
+                    </div>
+                </div>
+
+                <div class="color-circles-wrapper">
+                    <div class="color-circles-line">
+                        <div class="color-circle" style="background:#FF0000;" data-palette="bright-red"></div>
+                        <div class="color-circle" style="background:#FF8C00;" data-palette="bright-orange"></div>
+                        <div class="color-circle" style="background:#FFD700;" data-palette="bright-yellow"></div>
+                        <div class="color-circle" style="background:#00FFFF;" data-palette="bright-cyan"></div>
+                        <div class="color-circle" style="background:#0000FF;" data-palette="bright-blue"></div>
+                        <div class="color-circle" style="background:#8A2BE2;" data-palette="bright-purple"></div>
+                        <div class="color-circle" style="background:#FF00FF;" data-palette="bright-magenta"></div>
+                        <div class="color-circle" style="background:linear-gradient(45deg, #FF0000, #FFD700, #0000FF);" data-palette="full-rainbow"></div>
+                    </div>
+                    <div class="color-circles-line">
+                        <div class="color-circle" style="background:#8B0000;" data-palette="dark-red"></div>
+                        <div class="color-circle" style="background:#00008B;" data-palette="dark-blue"></div>
+                        <div class="color-circle" style="background:#B8860B;" data-palette="dark-gold"></div>
+                        <div class="color-circle" style="background:#FFB6C1;" data-palette="pastel-pink"></div>
+                        <div class="color-circle" style="background:#87CEEB;" data-palette="pastel-blue"></div>
+                        <div class="color-circle" style="background:#FF4500;" data-palette="warm-red"></div>
+                        <div class="color-circle" style="background:#DC143C;" data-palette="crimson"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <input type="file" id="fileInput" style="display:none" accept=".txt,.docx">
+                <button class="btn-open" onclick="document.getElementById('fileInput').click()">Open</button>
+                <button class="btn-conv" onclick="process('text')">Text</button>
+                <button class="btn-conv" onclick="process('word')">Word</button>
+                <button class="btn-conv" onclick="process('line')">Line</button>
+                <div style="display: flex; align-items: center; gap: 3px; background: #444; padding: 7px 10px; border-radius: 6px;">
+                    <span style="font-size: 11px; font-weight: bold;">BG:</span>
+                    <input type="color" id="bgColorPicker" class="mini-picker" value="#ffffff" oninput="applyBg(this.value)" style="margin: 0; border: none; width: 36px; height: 15px;">
+                </div>
+                <button class="btn-clear" onclick="clearAll()">Clear</button>
+                <button class="btn-dl" onclick="downloadDoc()">DOC</button>
+                <button class="btn-dl-alt" onclick="downloadPDFText()">PDF</button>
+                <button class="btn-dl-alt" onclick="downloadImage()">PNG</button>
+            </div>
+
+            <div class="size-control">
+                <div>
+                    <label>Width:</label>
+                    <input type="number" id="canvasWidth" min="50" max="3000" step="5">
+                </div>
+                <div>
+                    <label>Margin:</label>
+                    <input type="number" id="canvasMargin" value="0" min="0" max="2" step="0.05">
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="controls-wrapper">
+                <div class="control-row">
+                    <div class="control-label-area"><span>Font Style</span></div>
+                    <div class="slider-container">
+                        <select id="fontSelector" class="font-selector" onchange="changeFont(this.value)">
+                            <option value="Arial">Default (Arial)</option>
+                            <option value="'Dancing Script', cursive">Stylish Script</option>
+                            <option value="'Pacifico', cursive">Pacifico (Friendly)</option>
+                            <option value="'Lobster', cursive">Lobster (Retro)</option>
+                            <option value="'Righteous', cursive">Modern (Righteous)</option>
+                            <option value="'Playfair Display', serif">Elegant Serif</option>
+                            <option value="'Bangers', cursive">Comic (Bangers)</option>
+                            <option value="'Monoton', cursive">Neon Style</option>
+                            <option value="'Courier New', Courier, monospace">Typewriter</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <div class="control-label-area"><span>Text Size</span> <span id="sizeVal">12.0</span></div>
+                    <div class="slider-container">
+                        <input type="range" id="sizeSlider" min="8" max="100" step="0.1" value="12">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <div class="control-label-area"><span>Line Space</span> <span id="lineSpaceVal">1.4</span></div>
+                    <div class="slider-container">
+                        <input type="range" id="lineSpaceSlider" min="0.2" max="5.0" step="0.1" value="1.4">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <div class="control-label-area"><span>Soft Out</span> <span id="outlineVal">0.0</span></div>
+                    <div class="slider-container">
+                        <input type="range" id="outlineSlider" min="0" max="10.0" step="0.1" value="0">
+                    </div>
+                    <input type="color" id="outlineColorPicker" class="mini-picker" value="#ffffff">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="outputWrapper">
+        <div id="output"></div>
+    </div>
+</div>
+
+<script>
+    const output = document.getElementById('output');
+    const lineSlider = document.getElementById('lineSpaceSlider');
+    const lineValLabel = document.getElementById('lineSpaceVal');
+    const softSlider = document.getElementById('outlineSlider');
+    const softColor = document.getElementById('outlineColorPicker');
+
+    let currentBg = '#ffffff';
+    let lastMode = null;
+    let currentMargin = 0;
+
+    const palettes = {
+        'bright-red': ['#FF0000', '#FF3333', '#FF6666'],
+        'bright-orange': ['#FF8C00', '#FFA500', '#FFB732'],
+        'bright-yellow': ['#FFD700', '#FFE033', '#FFE866'],
+        'bright-cyan': ['#00FFFF', '#33FFFF', '#66FFFF'],
+        'bright-blue': ['#0000FF', '#3333FF', '#6633FF'],
+        'bright-purple': ['#8A2BE2', '#9A4BE9', '#AA6BEF'],
+        'bright-magenta': ['#FF00FF', '#FF33FF', '#FF66FF'],
+        'full-rainbow': ['#FF0000', '#FF8C00', '#FFD700', '#00FFFF', '#0000FF', '#8A2BE2', '#FF00FF'],
+        'dark-red': ['#8B0000', '#A52A2A', '#B22222'],
+        'dark-blue': ['#00008B', '#191970', '#4169E1'],
+        'dark-gold': ['#B8860B', '#DAA520', '#CD853F'],
+        'pastel-pink': ['#FFB6C1', '#FFC0CB', '#FFD1DC'],
+        'pastel-blue': ['#87CEEB', '#87CEFA', '#B0E0E6'],
+        'warm-red': ['#FF4500', '#FF6347', '#FF7F50'],
+        'crimson': ['#DC143C', '#E0315D', '#E44F7D']
+    };
+
+    let currentColors = palettes['full-rainbow'];
+
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function shufflePalette(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        if (file.name.endsWith('.docx')) {
+            reader.onload = (e) => {
+                mammoth.extractRawText({arrayBuffer: e.target.result})
+                .then(result => { document.getElementById('inputText').value = result.value; });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.onload = (e) => { document.getElementById('inputText').value = e.target.result; };
+            reader.readAsText(file);
+        }
+    });
+
+    document.getElementById('sizeSlider').oninput = function() {
+        document.getElementById('sizeVal').innerText = parseFloat(this.value).toFixed(1);
+        output.style.fontSize = this.value + "px";
+    };
+
+    lineSlider.oninput = function() {
+        lineValLabel.innerText = parseFloat(this.value).toFixed(1);
+        output.style.lineHeight = this.value;
+    };
+
+    function updateOutline() {
+        const softWidth = parseFloat(softSlider.value).toFixed(1);
+        const softC = softColor.value;
+        document.getElementById('outlineVal').innerText = softWidth;
+        output.style.textShadow = `0 0 ${softWidth}px ${softC}, 0 0 ${softWidth}px ${softC}`;
+    }
+
+    softSlider.oninput = updateOutline;
+    softColor.oninput = updateOutline;
+
+    function applyBg(color) {
+        currentBg = color;
+        output.style.backgroundColor = color;
+    }
+
+    function changeFont(font) {
+        output.style.fontFamily = font;
+    }
+
+    function toggleStyle(style) {
+        if (style === 'bold') {
+            output.style.fontWeight = (output.style.fontWeight === 'bold') ? 'normal' : 'bold';
+            document.getElementById('boldBtn').classList.toggle('active');
+        } else {
+            output.style.fontStyle = (output.style.fontStyle === 'italic') ? 'normal' : 'italic';
+            document.getElementById('italicBtn').classList.toggle('active');
+        }
+    }
+
+    function setAlignment(align) {
+        output.style.textAlign = align;
+        ['left', 'center', 'right'].forEach(a => {
+            const btn = document.getElementById(a + 'Btn');
+            if (btn) btn.classList.toggle('active', a === align);
+        });
+    }
+
+    function applyCanvasSize() {
+        let widthInput = document.getElementById('canvasWidth');
+        
+        // Auto-detect width on first load if not manually changed
+        if (!widthInput.dataset.manuallySet) {
+            widthInput.value = isMobile() ? 325 : 900;
+            widthInput.dataset.manuallySet = "true"; 
+        }
+
+        let widthVal = parseInt(widthInput.value) || 325;
+        const marginVal = parseFloat(document.getElementById('canvasMargin').value) || 0;
+        currentMargin = marginVal;
+
+        output.style.width = widthVal + 'px';
+        output.style.minHeight = '300px';
+        output.style.height = 'auto';
+        output.style.margin = '20px auto';
+        output.style.padding = marginVal + 'in';
+    }
+
+    document.getElementById('canvasWidth').oninput = (e) => {
+        e.target.dataset.manuallySet = "true";
+        applyCanvasSize();
+    };
+    document.getElementById('canvasMargin').oninput = applyCanvasSize;
+
+    function process(mode) {
+        const input = document.getElementById('inputText').value;
+        if(!input) return;
+        output.innerHTML = "";
+        lastMode = mode;
+
+        currentColors = shufflePalette([...currentColors]);
+
+        if (mode === 'line') {
+            input.split('\n').forEach((line, i) => {
+                const div = document.createElement('div');
+                div.style.color = currentColors[i % currentColors.length];
+                div.style.display = 'block';
+                div.style.whiteSpace = 'pre-wrap';
+                if (line.trim() === '') {
+                    div.innerHTML = '&nbsp;';
+                } else {
+                    div.innerText = line;
+                }
+                output.appendChild(div);
+            });
+        } else if (mode === 'word') {
+            const parts = input.split(/(\n|\s+)/);
+            parts.forEach((p, i) => {
+                if (p === '\n') { output.appendChild(document.createElement('br')); }
+                else {
+                    const span = document.createElement('span');
+                    span.style.color = currentColors[i % currentColors.length];
+                    span.innerText = p;
+                    output.appendChild(span);
+                }
+            });
+        } else {
+            [...input].forEach((char, i) => {
+                if (char === '\n') { output.appendChild(document.createElement('br')); }
+                else {
+                    const span = document.createElement('span');
+                    span.style.color = currentColors[i % currentColors.length];
+                    span.innerText = char;
+                    output.appendChild(span);
+                }
+            });
+        }
+
+        applyCanvasSize();
+    }
+
+    document.querySelectorAll('.color-circle').forEach(c => {
+        c.onclick = () => {
+            currentColors = palettes[c.dataset.palette] || currentColors;
+            if(lastMode) process(lastMode);
+        };
+    });
+
+    function clearAll() { 
+        document.getElementById('inputText').value = ""; 
+        output.innerHTML = ""; 
+        applyCanvasSize();
+    }
+
+    async function downloadPDFText() {
+        const { jsPDF } = window.jspdf;
+        const canvas = await html2canvas(output, { backgroundColor: currentBg, scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.setFillColor(currentBg);
+        pdf.rect(0, 0, pdfWidth, pdf.internal.pageSize.getHeight(), 'F');
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save("text.pdf");
+    }
+
+    function downloadDoc() {
+        const styles = window.getComputedStyle(output);
+        const wrapperStyle = `
+            background-color: ${currentBg};
+            font-family: ${styles.fontFamily};
+            font-size: ${styles.fontSize};
+            line-height: ${styles.lineHeight};
+            text-align: ${styles.textAlign};
+            font-weight: ${styles.fontWeight};
+            font-style: ${styles.fontStyle};
+            white-space: pre-wrap;
+            width: ${output.offsetWidth}px;
+            padding: ${currentMargin}in;
+        `.replace(/\s+/g, ' ').trim();
+
+        const content = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Text</title></head>
+<body style="margin:0; padding:0;"><div style="${wrapperStyle}">${output.innerHTML}</div></body></html>`;
+
+        const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'text.doc';
+        link.click();
+    }
+
+    function downloadImage() {
+        html2canvas(output, { backgroundColor: currentBg }).then(canvas => {
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL();
+            a.download = 'text.png';
+            a.click();
+        });
+    }
+
+    output.style.backgroundColor = currentBg;
+    applyCanvasSize();
+</script>
+</body>
+</html>
